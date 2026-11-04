@@ -1,0 +1,22 @@
+# Local defaults; overridden by environment variables in Docker/AWS
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: task-service
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/task_db}
+    username: ${DATABASE_USERNAME:task_user}
+    password: ${DATABASE_PASSWORD:task_pass}
+  jpa:
+    hibernate:
+      ddl-auto: update   # creates/updates the tasks table on startup
+    open-in-view: false
+
+app:
+  jwt:
+    # Must be the SAME secret the auth service signs tokens with (32+ bytes)
+    secret: ${JWT_SECRET:local-dev-secret-change-me-must-be-32-plus-bytes}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
