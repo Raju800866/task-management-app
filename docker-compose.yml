@@ -1,0 +1,78 @@
+# One command to run everything locally:
+#   docker-compose up --build
+# Then open http://localhost:3000
+
+services:
+  # ---------- Databases: one per service (database-per-service pattern) ----------
+  auth-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  task-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: task_db
+      POSTGRES_USER: task_user
+      POSTGRES_PASSWORD: task_pass
+    volumes:
+      - task-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U task_user -d task_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---------- Backend services ----------
+  auth-service:
+    build: ./auth-service
+    environment:
+      DATABASE_URL: postgresql+psycopg://auth_user:auth_pass@auth-db:5432/auth_db
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-me-must-be-32-plus-bytes}
+      JWT_EXPIRE_MINUTES: 60
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+    ports:
+      - "8000:8000"   # exposed for Swagger UI at http://localhost:8000/docs
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  task-service:
+    build: ./task-service
+    environment:
+      DATABASE_URL: jdbc:postgresql://task-db:5432/task_db
+      DATABASE_USERNAME: task_user
+      DATABASE_PASSWORD: task_pass
+      # Must match the auth service so tokens can be verified
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-me-must-be-32-plus-bytes}
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+    ports:
+      - "8080:8080"
+    depends_on:
+      task-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ---------- Frontend + local API gateway (nginx) ----------
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - auth-service
+      - task-service
+    restart: unless-stopped
+
+volumes:
+  auth-db-data:
+  task-db-data:
