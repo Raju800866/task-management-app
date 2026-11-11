@@ -70,6 +70,7 @@ public class TaskService {
         task.setDescription(request.description() == null ? null : request.description().trim());
         task.setStatus(request.status() != null ? request.status() : TaskStatus.TODO);
         task.setPriority(request.priority() != null ? request.priority() : TaskPriority.MEDIUM);
+        task.setCategory(request.category()); // null = no category
         task.setDueDate(request.dueDate());
     }
 }

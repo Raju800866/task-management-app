@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 import com.taskapp.taskservice.task.Task;
+import com.taskapp.taskservice.task.TaskCategory;
 import com.taskapp.taskservice.task.TaskPriority;
 import com.taskapp.taskservice.task.TaskStatus;
 
@@ -13,6 +14,7 @@ public record TaskResponse(
         String description,
         TaskStatus status,
         TaskPriority priority,
+        TaskCategory category,
         LocalDate dueDate,
         Instant createdAt,
         Instant updatedAt) {
@@ -24,6 +26,7 @@ public record TaskResponse(
                 task.getDescription(),
                 task.getStatus(),
                 task.getPriority(),
+                task.getCategory(),
                 task.getDueDate(),
                 task.getCreatedAt(),
                 task.getUpdatedAt());

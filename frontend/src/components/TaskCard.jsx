@@ -1,4 +1,4 @@
-import { STATUSES, priorityOf } from '../constants.js'
+import { STATUSES, categoryOf, priorityOf } from '../constants.js'
 
 function isOverdue(task) {
   if (!task.dueDate || task.status === 'DONE') return false
@@ -12,6 +12,7 @@ function formatDate(iso) {
 
 export default function TaskCard({ task, onStatusChange, onEdit, onDelete }) {
   const priority = priorityOf(task.priority)
+  const category = categoryOf(task.category)
   const overdue = isOverdue(task)
 
   return (
@@ -25,9 +26,16 @@ export default function TaskCard({ task, onStatusChange, onEdit, onDelete }) {
             <p className="mt-1 line-clamp-3 text-sm break-words whitespace-pre-line text-slate-500">{task.description}</p>
           )}
         </div>
-        <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${priority.badge}`}>
-          {priority.label}
-        </span>
+        <div className="flex shrink-0 items-center gap-1">
+          {category && (
+            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${category.badge}`}>
+              {category.label}
+            </span>
+          )}
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ${priority.badge}`}>
+            {priority.label}
+          </span>
+        </div>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2">

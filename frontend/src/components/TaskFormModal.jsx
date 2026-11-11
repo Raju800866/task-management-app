@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { PRIORITIES, STATUSES } from '../constants.js'
+import { CATEGORIES, PRIORITIES, STATUSES } from '../constants.js'
 import Alert from './Alert.jsx'
 import Spinner from './Spinner.jsx'
 
-const EMPTY = { title: '', description: '', status: 'TODO', priority: 'MEDIUM', dueDate: '' }
+const EMPTY = { title: '', description: '', status: 'TODO', priority: 'MEDIUM', category: '', dueDate: '' }
 
 export default function TaskFormModal({ task, onSave, onClose }) {
   const [form, setForm] = useState(EMPTY)
@@ -18,6 +18,7 @@ export default function TaskFormModal({ task, onSave, onClose }) {
           description: task.description ?? '',
           status: task.status,
           priority: task.priority,
+          category: task.category ?? '',
           dueDate: task.dueDate ?? '',
         }
       : EMPTY)
@@ -46,6 +47,7 @@ export default function TaskFormModal({ task, onSave, onClose }) {
         description: form.description.trim() || null,
         status: form.status,
         priority: form.priority,
+        category: form.category || null,
         dueDate: form.dueDate || null,
       })
     } catch (err) {
@@ -74,7 +76,7 @@ export default function TaskFormModal({ task, onSave, onClose }) {
             <textarea name="description" value={form.description} onChange={onChange} rows={3} maxLength={2000}
               className={inputCls} />
           </label>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <label className="block">
               <span className="mb-1 block text-sm font-medium text-slate-700">Status</span>
               <select name="status" value={form.status} onChange={onChange} className={inputCls}>
@@ -85,6 +87,13 @@ export default function TaskFormModal({ task, onSave, onClose }) {
               <span className="mb-1 block text-sm font-medium text-slate-700">Priority</span>
               <select name="priority" value={form.priority} onChange={onChange} className={inputCls}>
                 {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-slate-700">Category</span>
+              <select name="category" value={form.category} onChange={onChange} className={inputCls}>
+                <option value="">None</option>
+                {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
             </label>
             <label className="block">

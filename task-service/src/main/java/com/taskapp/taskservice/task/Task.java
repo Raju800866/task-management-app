@@ -43,6 +43,11 @@ public class Task {
     @Column(nullable = false, length = 10)
     private TaskPriority priority = TaskPriority.MEDIUM;
 
+    // Optional; nullable so existing rows keep working without a category.
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private TaskCategory category;
+
     @Column(name = "due_date")
     private LocalDate dueDate;
 
@@ -65,6 +70,8 @@ public class Task {
     public void setStatus(TaskStatus status) { this.status = status; }
     public TaskPriority getPriority() { return priority; }
     public void setPriority(TaskPriority priority) { this.priority = priority; }
+    public TaskCategory getCategory() { return category; }
+    public void setCategory(TaskCategory category) { this.category = category; }
     public LocalDate getDueDate() { return dueDate; }
     public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
     public Instant getCreatedAt() { return createdAt; }

@@ -10,5 +10,13 @@ export const PRIORITIES = [
   { value: 'HIGH', label: 'High', badge: 'bg-rose-50 text-rose-700 ring-rose-200' },
 ]
 
+// Optional; values must match the Java TaskCategory enum.
+export const CATEGORIES = [
+  { value: 'WORK', label: 'Work', badge: 'bg-blue-50 text-blue-700 ring-blue-200' },
+  { value: 'PERSONAL', label: 'Personal', badge: 'bg-teal-50 text-teal-700 ring-teal-200' },
+  { value: 'STUDY', label: 'Study', badge: 'bg-orange-50 text-orange-700 ring-orange-200' },
+]
+
 export const statusOf = (v) => STATUSES.find((s) => s.value === v) ?? STATUSES[0]
 export const priorityOf = (v) => PRIORITIES.find((p) => p.value === v) ?? PRIORITIES[1]
+export const categoryOf = (v) => CATEGORIES.find((c) => c.value === v) ?? null

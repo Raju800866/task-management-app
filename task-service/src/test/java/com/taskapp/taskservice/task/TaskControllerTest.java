@@ -47,7 +47,7 @@ class TaskControllerTest {
     @Test
     void listsOnlyTheCallersTasks() throws Exception {
         TaskResponse task = new TaskResponse(1L, "Write tests", null, TaskStatus.TODO,
-                TaskPriority.HIGH, null, Instant.now(), Instant.now());
+                TaskPriority.HIGH, null, null, Instant.now(), Instant.now());
         when(taskService.list(eq(42L), isNull())).thenReturn(List.of(task));
 
         mvc.perform(get("/api/tasks").with(jwt().jwt(j -> j.subject("42"))))
@@ -72,7 +72,7 @@ class TaskControllerTest {
     @Test
     void createsTaskForCaller() throws Exception {
         TaskResponse created = new TaskResponse(5L, "Deploy", null, TaskStatus.TODO,
-                TaskPriority.MEDIUM, null, Instant.now(), Instant.now());
+                TaskPriority.MEDIUM, null, null, Instant.now(), Instant.now());
         when(taskService.create(eq(42L), any(TaskRequest.class))).thenReturn(created);
 
         mvc.perform(post("/api/tasks")
