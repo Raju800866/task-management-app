@@ -51,6 +51,15 @@ Useful extras:
 - Auth API docs (Swagger): http://localhost:8000/docs
 - Health checks: http://localhost:8000/api/auth/health, http://localhost:8080/api/tasks/health
 - Reset all data: `docker-compose down -v`
+- Task-completion emails (caught by Mailpit, nothing is really sent): http://localhost:8025
+
+## Notifications
+
+When a task moves into **Done** (via the status dropdown or the edit form), task-service emails the owner.
+- The recipient comes from the `email` claim in the JWT, so there's no call to the auth service.
+- The email is sent after the database commit, on a background thread. If the mail server is down, the task still saves and the failure is only logged.
+- Re-saving a task that's already done doesn't send a second email.
+- Locally the emails go to Mailpit. On AWS, set `MAIL_ENABLED=true` and the SMTP settings in `deploy/.env` (see `deploy/.env.example`, e.g. AWS SES). Emails are off by default.
 
 ## API
 

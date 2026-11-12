@@ -6,6 +6,7 @@ import TaskCard from '../components/TaskCard.jsx'
 import TaskFormModal from '../components/TaskFormModal.jsx'
 import Alert from '../components/Alert.jsx'
 import Spinner from '../components/Spinner.jsx'
+import NotificationBell from '../components/NotificationBell.jsx'
 
 const FILTERS = [{ value: 'ALL', label: 'All' }, ...STATUSES]
 
@@ -90,6 +91,7 @@ export default function Dashboard() {
             <span className="text-lg font-bold text-slate-900">TaskFlow</span>
           </div>
           <div className="flex items-center gap-3">
+            <NotificationBell />
             <span className="hidden text-sm text-slate-600 sm:inline">{user ? `Hi, ${user.name}` : ''}</span>
             <button onClick={logout}
               className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">

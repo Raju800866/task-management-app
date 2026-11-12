@@ -77,7 +77,7 @@ def login(payload: schemas.LoginRequest, db: Session = Depends(get_db)):
             detail="Invalid email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    token = create_access_token(user.id, user.email)
+    token = create_access_token(user.id, user.email, user.name)
     return schemas.TokenResponse(
         access_token=token, expires_in=settings.jwt_expire_minutes * 60
     )

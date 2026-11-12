@@ -1,11 +1,16 @@
 package com.taskapp.taskservice.task;
 
+import java.time.Instant;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.taskapp.taskservice.auth.CurrentUser;
 import com.taskapp.taskservice.exception.TaskNotFoundException;
+import com.taskapp.taskservice.notification.NotificationService;
+import com.taskapp.taskservice.notification.TaskCompletedEvent;
 import com.taskapp.taskservice.task.dto.TaskRequest;
 import com.taskapp.taskservice.task.dto.TaskResponse;
 
@@ -13,9 +18,14 @@ import com.taskapp.taskservice.task.dto.TaskResponse;
 public class TaskService {
 
     private final TaskRepository repository;
+    private final ApplicationEventPublisher events;
+    private final NotificationService notifications;
 
-    public TaskService(TaskRepository repository) {
+    public TaskService(TaskRepository repository, ApplicationEventPublisher events,
+                       NotificationService notifications) {
         this.repository = repository;
+        this.events = events;
+        this.notifications = notifications;
     }
 
     @Transactional(readOnly = true)
@@ -32,25 +42,33 @@ public class TaskService {
     }
 
     @Transactional
-    public TaskResponse create(Long userId, TaskRequest request) {
+    public TaskResponse create(CurrentUser user, TaskRequest request) {
         Task task = new Task();
-        task.setUserId(userId);
+        task.setUserId(user.id());
         apply(task, request);
-        return TaskResponse.from(repository.save(task));
+        Task saved = repository.save(task);
+        notifications.record(user.id(), saved.getId(), "%s created \"%s\"".formatted(user.name(), saved.getTitle()));
+        return TaskResponse.from(saved);
     }
 
     @Transactional
-    public TaskResponse update(Long userId, Long taskId, TaskRequest request) {
-        Task task = findOwned(userId, taskId);
+    public TaskResponse update(CurrentUser user, Long taskId, TaskRequest request) {
+        Task task = findOwned(user.id(), taskId);
+        TaskStatus previous = task.getStatus();
         apply(task, request);
-        return TaskResponse.from(repository.saveAndFlush(task));
+        Task saved = repository.saveAndFlush(task);
+        afterStatusChange(user, previous, saved);
+        return TaskResponse.from(saved);
     }
 
     @Transactional
-    public TaskResponse updateStatus(Long userId, Long taskId, TaskStatus status) {
-        Task task = findOwned(userId, taskId);
+    public TaskResponse updateStatus(CurrentUser user, Long taskId, TaskStatus status) {
+        Task task = findOwned(user.id(), taskId);
+        TaskStatus previous = task.getStatus();
         task.setStatus(status);
-        return TaskResponse.from(repository.saveAndFlush(task));
+        Task saved = repository.saveAndFlush(task);
+        afterStatusChange(user, previous, saved);
+        return TaskResponse.from(saved);
     }
 
     @Transactional
@@ -63,6 +81,20 @@ public class TaskService {
     private Task findOwned(Long userId, Long taskId) {
         return repository.findByIdAndUserId(taskId, userId)
                 .orElseThrow(() -> new TaskNotFoundException(taskId));
+    }
+
+    // Only a real status change counts; re-saving with the same status records nothing.
+    private void afterStatusChange(CurrentUser user, TaskStatus previous, Task task) {
+        if (previous == task.getStatus()) {
+            return;
+        }
+        // Activity entry, saved in the same transaction as the task change
+        notifications.record(user.id(), task.getId(),
+                "%s moved \"%s\" to %s".formatted(user.name(), task.getTitle(), task.getStatus().label()));
+        // Completion email, sent after commit (see CompletionEmailNotifier)
+        if (task.getStatus() == TaskStatus.DONE) {
+            events.publishEvent(new TaskCompletedEvent(task.getId(), task.getTitle(), user.email(), Instant.now()));
+        }
     }
 
     private void apply(Task task, TaskRequest request) {

@@ -17,11 +17,12 @@ def verify_password(password: str, hashed_password: str) -> bool:
         return False
 
 
-def create_access_token(user_id: int, email: str) -> str:
+def create_access_token(user_id: int, email: str, name: str) -> str:
     now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),  # subject = user id (must be a string)
         "email": email,
+        "name": name,  # shown in activity notifications by the task service
         "iat": now,
         "exp": now + timedelta(minutes=settings.jwt_expire_minutes),
     }

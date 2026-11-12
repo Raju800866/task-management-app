@@ -79,3 +79,9 @@ export const taskApi = {
   updateStatus: (id, status) => request(`/api/tasks/${id}/status`, { method: 'PATCH', body: { status } }),
   remove: (id) => request(`/api/tasks/${id}`, { method: 'DELETE' }),
 }
+
+export const notificationApi = {
+  list: () => request('/api/notifications'),
+  unreadCount: () => request('/api/notifications/unread-count'),
+  markAllRead: () => request('/api/notifications/read-all', { method: 'PATCH' }),
+}

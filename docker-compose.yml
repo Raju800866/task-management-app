@@ -56,11 +56,25 @@ services:
       # Must match the auth service so tokens can be verified
       JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-me-must-be-32-plus-bytes}
       CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+      # Task-completion emails go to Mailpit; view them at http://localhost:8025
+      MAIL_ENABLED: "true"
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      APP_URL: http://localhost:3000
     ports:
       - "8080:8080"
     depends_on:
       task-db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
+    restart: unless-stopped
+
+  # ---------- Local mail catcher (no real emails are sent) ----------
+  mailpit:
+    image: axllent/mailpit:v1.21.8
+    ports:
+      - "8025:8025"   # web UI to read caught emails
     restart: unless-stopped
 
   # ---------- Frontend + local API gateway (nginx) ----------

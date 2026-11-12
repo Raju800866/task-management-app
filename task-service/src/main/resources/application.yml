@@ -13,10 +13,29 @@ spring:
     hibernate:
       ddl-auto: update   # creates/updates the tasks table on startup
     open-in-view: false
+  # SMTP server for notification emails. Locally: Mailpit (see docker-compose.yml).
+  # AWS SES: host email-smtp.<region>.amazonaws.com, port 587, auth + starttls true.
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_STARTTLS:false}
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
 
 app:
   jwt:
     # Must be the SAME secret the auth service signs tokens with (32+ bytes)
     secret: ${JWT_SECRET:local-dev-secret-change-me-must-be-32-plus-bytes}
+  notifications:
+    # Off unless explicitly enabled, so nothing is sent without a configured mail server
+    email:
+      enabled: ${MAIL_ENABLED:false}
+      from: ${MAIL_FROM:TaskFlow <no-reply@taskflow.local>}
+    app-url: ${APP_URL:http://localhost:3000}
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173}

@@ -11,6 +11,7 @@ export default defineConfig({
     proxy: {
       '/api/auth': 'http://localhost:8000',
       '/api/tasks': 'http://localhost:8080',
+      '/api/notifications': 'http://localhost:8080',
     },
   },
 })

@@ -24,6 +24,9 @@ Task management app built as microservices. Read this before making changes.
 - Enum values (status, priority) must match between Java enums and `frontend/src/constants.js`.
 - Validation errors are returned as RFC 7807 JSON with an `errors` map; the frontend shows them per field.
 - Java must stay compatible with Java 17. Keep code style consistent with the existing files.
+- Task-completion emails: `TaskService` publishes `notification/TaskCompletedEvent` only on a transition INTO `DONE`; `CompletionEmailNotifier` sends it after commit, async, and must never throw. Off unless `MAIL_ENABLED=true`.
+- Activity feed: `TaskService` calls `NotificationService.record()` on create and on every real status change, inside the same transaction. The actor comes from `auth/CurrentUser.from(jwt)` (JWT `name` claim, falls back to the email's local part).
+- A new `/api/<prefix>` must be routed in `frontend/nginx.conf`, `deploy/nginx.conf` and `frontend/vite.config.js` (CloudFront already forwards `/api/*`).
 - Never commit secrets. Real values live only in `deploy/.env` on the server.
 
 ## Commands

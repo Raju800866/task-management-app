@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.taskapp.taskservice.auth.CurrentUser;
 import com.taskapp.taskservice.config.SecurityConfig;
 import com.taskapp.taskservice.exception.TaskNotFoundException;
 import com.taskapp.taskservice.task.dto.TaskRequest;
@@ -73,7 +74,7 @@ class TaskControllerTest {
     void createsTaskForCaller() throws Exception {
         TaskResponse created = new TaskResponse(5L, "Deploy", null, TaskStatus.TODO,
                 TaskPriority.MEDIUM, null, null, Instant.now(), Instant.now());
-        when(taskService.create(eq(42L), any(TaskRequest.class))).thenReturn(created);
+        when(taskService.create(any(CurrentUser.class), any(TaskRequest.class))).thenReturn(created);
 
         mvc.perform(post("/api/tasks")
                         .with(jwt().jwt(j -> j.subject("42")))
